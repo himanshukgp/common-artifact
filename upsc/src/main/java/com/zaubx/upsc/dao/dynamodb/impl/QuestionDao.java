@@ -8,14 +8,13 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.zaubx.upsc.dao.dynamodb.entity.Question;
 import com.zaubx.upsc.model.enums.QuestionType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 
-@Repository
 @RequiredArgsConstructor
 public class QuestionDao {
 
@@ -147,6 +146,41 @@ public class QuestionDao {
         List<Question> result = mapper.scan(Question.class, scan);
 
         return result.isEmpty() ? null : result.get(0);
+    }
+
+    // Additional repository methods moved from QuestionRepository
+    public void save(Question question) {
+        mapper.save(question);
+    }
+
+    public Optional<Question> findByIdOptional(String questionId) {
+        return Optional.ofNullable(findById(questionId));
+    }
+
+    public List<Question> findByType(QuestionType type) {
+        DynamoDBQueryExpression<Question> query = new DynamoDBQueryExpression<Question>()
+                .withIndexName("type-index")
+                .withConsistentRead(false)
+                .withKeyConditionExpression("#t = :type")
+                .withExpressionAttributeNames(Map.of("#t", "type"))
+                .withExpressionAttributeValues(Map.of(":type", new AttributeValue().withS(type.name())));
+
+        return mapper.query(Question.class, query);
+    }
+
+    public List<Question> findBySubject(String subject) {
+        DynamoDBQueryExpression<Question> query = new DynamoDBQueryExpression<Question>()
+                .withIndexName("subject-index")
+                .withConsistentRead(false)
+                .withKeyConditionExpression("subject = :subject")
+                .withExpressionAttributeValues(Map.of(":subject", new AttributeValue().withS(subject)));
+
+        return mapper.query(Question.class, query);
+    }
+
+    public List<Question> scanAll(int limit) {
+        DynamoDBScanExpression scan = new DynamoDBScanExpression().withLimit(limit);
+        return mapper.scan(Question.class, scan);
     }
 
 
