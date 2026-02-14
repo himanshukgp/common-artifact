@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.zaubx.upsc.dao.dynamodb.entity.Question;
 import com.zaubx.upsc.model.enums.QuestionType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.Random;
 
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class QuestionDao {
@@ -138,16 +140,29 @@ public class QuestionDao {
     }
 
     public Question findById(String questionId) {
+        try {
+            log.debug("[QUESTION_DAO] findById started - questionId={}", questionId);
+            DynamoDBScanExpression scan = new DynamoDBScanExpression()
+                    .withFilterExpression("questionId = :qid")
+                    .withExpressionAttributeValues(
+                            Map.of(":qid", new AttributeValue().withS(questionId))
+                    );
 
-        DynamoDBScanExpression scan = new DynamoDBScanExpression()
-                .withFilterExpression("questionId = :qid")
-                .withExpressionAttributeValues(
-                        Map.of(":qid", new AttributeValue().withS(questionId))
-                );
-
-        List<Question> result = mapper.scan(Question.class, scan);
-
-        return result.isEmpty() ? null : result.get(0);
+            List<Question> result = mapper.scan(Question.class, scan);
+            
+            if (result.isEmpty()) {
+                log.warn("[QUESTION_DAO] findById - Question not found - questionId={}", questionId);
+                return null;
+            }
+            
+            Question question = result.get(0);
+            log.info("[QUESTION_DAO] findById completed - questionId={}, contextGroup={}, answer={}", 
+                    questionId, question.getContextGroup(), question.getAnswer());
+            return question;
+        } catch (Exception e) {
+            log.error("[QUESTION_DAO] findById failed - questionId={}", questionId, e);
+            throw e;
+        }
     }
 
     // Additional repository methods moved from QuestionRepository
