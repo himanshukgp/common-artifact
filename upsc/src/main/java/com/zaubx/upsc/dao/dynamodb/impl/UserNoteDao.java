@@ -5,11 +5,13 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.zaubx.upsc.dao.dynamodb.entity.UserNote;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Repository
 @RequiredArgsConstructor
 public class UserNoteDao {
 

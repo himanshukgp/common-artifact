@@ -6,10 +6,12 @@ import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue;
 import com.zaubx.upsc.dao.dynamodb.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Repository
 @RequiredArgsConstructor
 public class UserDao {
 

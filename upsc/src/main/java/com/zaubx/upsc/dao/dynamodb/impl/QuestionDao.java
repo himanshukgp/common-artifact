@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.zaubx.upsc.dao.dynamodb.entity.Question;
 import com.zaubx.upsc.model.enums.QuestionType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import java.util.Random;
 
 
+@Repository
 @RequiredArgsConstructor
 public class QuestionDao {
 
