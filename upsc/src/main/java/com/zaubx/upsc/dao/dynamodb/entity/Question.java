@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -80,5 +82,8 @@ public class Question {
     // Optional - Metadata
     @DynamoDBAttribute(attributeName = "publishTime")
     private String publishTime;
+
+    @DynamoDBAttribute(attributeName = "knowledgeTopicNames")
+    private List<String> knowledgeTopicNames;
 
 }
