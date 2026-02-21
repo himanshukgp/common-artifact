@@ -21,26 +21,35 @@ public class UserNoteDao {
         mapper.save(note);
     }
 
-    public Optional<UserNote> findByUserIdAndQuestionId(String userId, String questionId) {
-        return Optional.ofNullable(mapper.load(UserNote.class, userId, questionId));
+    public Optional<UserNote> findByPkAndSk(String pk, String sk) {
+        return Optional.ofNullable(mapper.load(UserNote.class, pk, sk));
     }
 
-    public List<UserNote> findByUserId(String userId) {
+    public List<UserNote> findAllByUserId(String userId) {
+        String pk = UserNote.buildPk(userId);
         DynamoDBQueryExpression<UserNote> query = new DynamoDBQueryExpression<UserNote>()
-                .withKeyConditionExpression("userId = :userId")
-                .withExpressionAttributeValues(Map.of(":userId", new AttributeValue().withS(userId)));
+                .withKeyConditionExpression("pk = :pk AND begins_with(sk, :skPrefix)")
+                .withExpressionAttributeValues(Map.of(
+                        ":pk", new AttributeValue().withS(pk),
+                        ":skPrefix", new AttributeValue().withS("NOTE#")
+                ))
+                .withScanIndexForward(false); // newest first
 
         return mapper.query(UserNote.class, query);
     }
 
-    public void delete(String userId, String questionId) {
-        UserNote note = mapper.load(UserNote.class, userId, questionId);
+    public Optional<UserNote> findByUserIdAndNoteId(String userId, String noteId) {
+        return findByPkAndSk(UserNote.buildPk(userId), UserNote.buildSk(noteId));
+    }
+
+    public void delete(String userId, String noteId) {
+        UserNote note = mapper.load(UserNote.class, UserNote.buildPk(userId), UserNote.buildSk(noteId));
         if (note != null) {
             mapper.delete(note);
         }
     }
 
-    public boolean exists(String userId, String questionId) {
-        return findByUserIdAndQuestionId(userId, questionId).isPresent();
+    public boolean exists(String userId, String noteId) {
+        return findByUserIdAndNoteId(userId, noteId).isPresent();
     }
 }

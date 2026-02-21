@@ -200,7 +200,56 @@ public class QuestionDao {
         return mapper.scan(Question.class, scan);
     }
 
+    public int countByContextGroup(String contextGroup) {
+        Question hashKey = new Question();
+        hashKey.setContextGroup(contextGroup);
 
+        DynamoDBQueryExpression<Question> query =
+                new DynamoDBQueryExpression<Question>()
+                        .withHashKeyValues(hashKey);
 
+        return mapper.count(Question.class, query);
+    }
+
+    public List<Question> fetchAllByContextGroup(String contextGroup) {
+        Question hashKey = new Question();
+        hashKey.setContextGroup(contextGroup);
+
+        DynamoDBQueryExpression<Question> query =
+                new DynamoDBQueryExpression<Question>()
+                        .withHashKeyValues(hashKey);
+
+        return mapper.query(Question.class, query);
+    }
+
+    public List<Question> fetchByMultipleContextGroups(List<String> contextGroups, int limit) {
+        List<Question> pool = new java.util.ArrayList<>();
+
+        for (String cg : contextGroups) {
+            List<Question> batch = fetchAllByContextGroup(cg);
+            pool.addAll(batch);
+            if (pool.size() >= limit * 2) break;
+        }
+
+        java.util.Collections.shuffle(pool, random);
+        return pool.stream().limit(limit).toList();
+    }
+
+    public List<String> listContextGroupsByPrefix(String prefix) {
+        DynamoDBScanExpression scan = new DynamoDBScanExpression()
+                .withProjectionExpression("#cg")
+                .withFilterExpression("begins_with(#cg, :prefix)")
+                .withExpressionAttributeNames(Map.of("#cg", "contextGroup"))
+                .withExpressionAttributeValues(
+                        Map.of(":prefix", new AttributeValue().withS(prefix))
+                );
+
+        List<Question> results = mapper.scan(Question.class, scan);
+        return results.stream()
+                .map(Question::getContextGroup)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+    }
 }
 
