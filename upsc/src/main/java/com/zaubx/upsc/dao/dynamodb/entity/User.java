@@ -43,6 +43,21 @@ public class User {
     @DynamoDBAttribute(attributeName = "lastSeenAt")
     private Long lastSeenAt;
 
+    @DynamoDBAttribute(attributeName = "targetYear")
+    private String targetYear; // e.g. "2026"
+
+    @DynamoDBAttribute(attributeName = "preparationLevel")
+    private String preparationLevel; // BEGINNER | INTERMEDIATE | ADVANCED
+
+    @DynamoDBAttribute(attributeName = "optionalSubjects")
+    private String optionalSubjects; // comma-separated optional subjects for Mains
+
+    @DynamoDBAttribute(attributeName = "city")
+    private String city;
+
+    @DynamoDBAttribute(attributeName = "bio")
+    private String bio;
+
     /* -------- Builders -------- */
 
     public static String buildPk(String userId) {

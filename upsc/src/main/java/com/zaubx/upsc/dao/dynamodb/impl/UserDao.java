@@ -50,4 +50,16 @@ public class UserDao {
             return false;
         }
     }
+
+    public User load(String userId) {
+        return dynamoDBMapper.load(
+                User.class,
+                User.buildPk(userId),
+                User.buildSk()
+        );
+    }
+
+    public void save(User user) {
+        dynamoDBMapper.save(user);
+    }
 }
